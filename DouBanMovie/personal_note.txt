@@ -1,0 +1,88 @@
+口碑的流行
+http://movie.douban.com/subject/26320029/reviews?start=1&filter=&limit=20
+
+//*[@id="content"]/div/div[1]/div[1]/div[3]
+
+###next page
+
+//*[@id="paginator"]/a
+response.xpath('//*[@id="paginator"]/a').extract() # a list, should select [0]
+response.xpath('//*[@id="paginator"]/a/@href').extract() #@class (next)
+response.url.split("?")[0] # front half (otherwise, -1 for the back half)
+
+//*[@id="paginator"]/span[1] #the last page
+### title
+//*[@id="content"]/div/div[1]/div[1]/div[20]/div[1]/h3/a[2]
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[20]/div[1]/h3/a[2]/@title').extract()[0]
+
+### content
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/h3/a[2]
+//*[@id="content"]/div/div[1]/div[1]/div[2]/div[1]/h3/a[2]
+//*[@id="content"]/div/div[1]/div[1]/div[3]/div[1]/h3/a[2]
+...
+//*[@id="content"]/div/div[1]/div[1]/div[20]/div[1]/h3/a[2]
+# next page
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/h3/a[2]
+...
+
+//*[@id="content"]/div/div[1]/div[1]/div/div[1]/h3/a[2]
+response.xpath('//*//*[@id="content"]/div/div[1]/div[1]/div/div[1]/h3/a[2]').extract()
+response.xpath('//*//*[@id="content"]/div/div[1]/div[1]/div/div[1]/h3/a[2]/@href').extract() #hreflist
+
+
+### stars
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/span
+//*[@id="content"]/div/div[1]/div[1]/div[2]/div[1]/div/span
+...
+
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/span').extract()
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div/div[1]/div/span').extract()
+通过评价看
+
+### time
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()
+//*[@id="content"]/div/div[1]/div[1]/div[2]/div[1]/div/text()
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()').extract()
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div/div[1]/div/text()').extract()
+
+具体时间比如：
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()').extract()[1].strip(' \r\n-|\\/=><')
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()').extract()[1].strip(' \r\n-|\\/=><').split(' ')
+#date:
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()').extract()[1].strip(' \r\n-|\\/=><').split(' ')[0]
+#time:
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[1]/div/text()').extract()[1].strip(' \r\n-|\\/=><').split(' ')[1]
+
+### useful
+
+#try
+//*[@id="7691079_short_useful"]
+//*[@id="content"]/div/div[1]/div[1]/div[3]/div[2]
+//*[@id="review_7690802_short"]/div
+//div[@id="content"]//div[@class="review"]//div[@class="review-bd"]//div[@class="review-short-ft"]
+response.xpath('//div[@id="content"]//div[@class="review"]//div[@class="review-bd"]//div[@class="review-short-ft"]').extract()
+
+//*[@id="content"]/div/div[1]/div[1]/div[1] #class="review"
+//*[@id="content"]/div/div[1]/div[1]/div[2]
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span/text()').extract()
+
+# total agree
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span/text()').extract()[0].split('/')[-1]
+# agree - disagree
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span/text()').extract()[0].split('/')[0]
+
+#a to i
+import string
+str = response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/span/text()').extract()[0].split('/')[0]
+num = string.atoi(str)
+
+### responses
+//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/a/text()
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/a/text()').extract()[0]
+response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[20]/div[2]/div[1]/div[1]/a/text()').extract()
+### 特别注意，如果没有评论，则response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[20]/div[2]/div[1]/div[1]/a/text()').extract()[0]将导致下标越界错误，因为根本是空列表
+#只提取数字（仍是字符串结果）
+import re
+str = response.xpath('//*[@id="content"]/div/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/a/text()').extract()[0]
+result = re.findall("\d+", str)[0] #最多也只到0了这次
