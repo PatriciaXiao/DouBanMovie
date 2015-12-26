@@ -8,6 +8,13 @@ http://movie.douban.com/subject/26320029/reviews?start=1&filter=&limit=20
 //*[@id="paginator"]/a
 response.xpath('//*[@id="paginator"]/a').extract() # a list, should select [0]
 response.xpath('//*[@id="paginator"]/a/@href').extract() #@class (next)
+
+不对，以上只适用第一页
+//*[@id="paginator"]/a[3]才是后面的
+1-len为下标的那个a即可
+
+
+
 response.url.split("?")[0] # front half (otherwise, -1 for the back half)
 
 //*[@id="paginator"]/span[1] #the last page
